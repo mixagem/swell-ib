@@ -10,11 +10,12 @@ const swellScale = {
     7: 'violet'
 }
 
-// last visited scale
-let lastScales = [0];
+// last shown colors
+let lastShownColors = [0];
 
-// timer array
-const timer = [];
+// timers
+const placeholderTimer = [];
+const rouletteTimer = [];
 
 // trigger
 window.onkeypress = function (event) {
@@ -24,59 +25,76 @@ window.onkeypress = function (event) {
 
 // roulette
 function swellRoulette() {
+    //clear existing timers
+    clearRouletteTimer();
+    clearPlaceholderTimer();
 
     // rng for the next color
-    clearPlaceholderTimer();
     const newScale = rng();
-    if (lastScales.includes(newScale)) { return swellRoulette() };
+    // if the rng returns one of the last 2 shown colors, we trigger the rng again
+    if (lastShownColors.includes(newScale)) { return swellRoulette() };
 
-    // last dipslayed color (in order to add the hidden class)
-    const lastShownScale = lastScales[lastScales.length - 1];
-
-    const currentElement = document.querySelector(`#${swellScale[lastShownScale]}`)
-    const nextElement = document.querySelector(`#${swellScale[newScale]}`)
+    // hide last shown color /placeholder
+    const lastShownColor = lastShownColors[lastShownColors.length - 1];
+    const currentElement = document.querySelector(`#${swellScale[lastShownColor]}`)
     currentElement.classList.add('hidden');
-    nextElement.classList.remove('hidden');
 
-    // reseting the video
-    nextElement.currentTime = 0
-
-    // saving the color to the list of last displayed colors
-    lastScales.push(newScale)
+    // saving next color to show
+    lastShownColors.push(newScale)
 
     // slicing the list of last displayed colors (keeping track only the last 2 shown colors)
-    if (lastScales.length > 2) {
-        lastScales = lastScales.slice(-2)
-    }
+    if (lastShownColors.length > 2) { lastShownColors = lastShownColors.slice(-2) }
 
-    // revert to placeholder timmer
-    timer.push(setPlaceholderTimer());
+    // trigger roulette animation
+    const rouletteElement = document.querySelector(`#roulette`);
+    rouletteElement.currentTime = 0;
+    rouletteElement.classList.remove('hidden');
+
+    // roulette animation timer (5 sec)
+    rouletteTimer.push(setRouletteTimer())
 }
 
-// 5 secs max before reverting to placeholder 
+function setRouletteTimer() {
+    return setTimeout(() => {
+        // hide roulette
+        const rouletteElement = document.querySelector(`#roulette`);
+        rouletteElement.classList.add('hidden');
+
+        // show color
+        const colorToShow = lastShownColors[lastShownColors.length - 1]
+        const nextElement = document.querySelector(`#${swellScale[colorToShow]}`)
+        nextElement.currentTime = 0
+        nextElement.classList.remove('hidden');
+
+        // return to placeholder timer
+        placeholderTimer.push(setPlaceholderTimer())
+    }, 3000);
+}
+
+// 15 secs max before reverting to placeholder 
 function setPlaceholderTimer() {
     return setTimeout(() => {
 
-        // last dipslayed color (in order to add the hidden class)
-        const lastShownScale = lastScales[lastScales.length - 1];
-
-        const currentElement = document.querySelector(`#${swellScale[lastShownScale]}`)
-        const nextElement = document.querySelector(`#${swellScale[0]}`)
+        // hide last shown color 
+        const lastShownColor = lastShownColors[lastShownColors.length - 1];
+        const currentElement = document.querySelector(`#${swellScale[lastShownColor]}`)
         currentElement.classList.add('hidden');
+
+        // show placeholder
+        const nextElement = document.querySelector(`#placeholder`)
+        nextElement.currentTime = 0
         nextElement.classList.remove('hidden');
 
-        // reseting the video
-        nextElement.currentTime = 0
-
-        // reseting the last displayed colors because we went back to the placeholder
-        lastScales = [0];
-    }, 5000);
+        // reset shown colors history
+        lastShownColors = [0];
+    },15000);
 }
 
 // revert to placeholder timer reset (in case of another trigger while displaying a color already)
-function clearPlaceholderTimer() {
-    for (let i = 0; i < timer.length; i++) { clearTimeout(timer[i]); }
-}
+function clearPlaceholderTimer() { for (let i = 0; i < placeholderTimer.length; i++) { clearTimeout(placeholderTimer[i]); } }
+
+// roulette reset (in case of another trigger while displaying the roulette already)
+function clearRouletteTimer() { for (let i = 0; i < rouletteTimer.length; i++) { clearTimeout(rouletteTimer[i]); } }
 
 // random number generator beetween 1 - 7
 function rng() { return Math.floor(Math.random() * 7 + 1) }
