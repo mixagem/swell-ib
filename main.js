@@ -10,73 +10,80 @@ const swellScale = {
     7: 'violet'
 }
 
-// last visited scale
-let lastScales = [0];
+// timings (ms)
+const timeBeforePlaceholder = 15000;
+const minimumRouletteTime = 5000;
+
+// spinning roulette flag
+let canWeSpinNow = true;
+
+// last shown colors
+let lastShownColors = [0];
 
 // timer array
 const timer = [];
 
-// trigger
+// roulette trigger 
 window.onkeypress = function (event) {
-    if (event.key !== 'Enter') { return }
+    if (event.key !== 'Enter' || !canWeSpinNow) { return }
     swellRoulette();
 }
 
 // roulette
 function swellRoulette() {
 
-    // rng for the next color
+    // clearing placeholder timer
     clearPlaceholderTimer();
-    const newScale = rng();
-    if (lastScales.includes(newScale)) { return swellRoulette() };
 
-    // last dipslayed color (in order to add the hidden class)
-    const lastShownScale = lastScales[lastScales.length - 1];
+    // next color rng
+    const colorEnum = rng();
+    if (lastShownColors.includes(colorEnum)) { return swellRoulette() };
 
-    const currentElement = document.querySelector(`#${swellScale[lastShownScale]}`)
-    const nextElement = document.querySelector(`#${swellScale[newScale]}`)
-    currentElement.classList.add('hidden');
-    nextElement.classList.remove('hidden');
+    // roulette trigger prevention 
+    canWeSpinNow = false;
 
-    // reseting the video
-    nextElement.currentTime = 0
+    // color swapping
+    const lastShownColor = lastShownColors[lastShownColors.length - 1];
+    const previousColor = document.querySelector(`#${swellScale[lastShownColor]}`)
+    const nextColor = document.querySelector(`#${swellScale[colorEnum]}`)
+    previousColor.classList.add('hidden');
+    nextColor.currentTime = 0
+    nextColor.classList.remove('hidden');
 
-    // saving the color to the list of last displayed colors
-    lastScales.push(newScale)
+    // saving shown color
+    lastShownColors.push(colorEnum)
 
     // slicing the list of last displayed colors (keeping track only the last 2 shown colors)
-    if (lastScales.length > 2) {
-        lastScales = lastScales.slice(-2)
-    }
+    if (lastShownColors.length > 2) { lastShownColors = lastShownColors.slice(-2) }
 
-    // revert to placeholder timmer
+    // roulette cooldown timer
+    setTimeout(() => { canWeSpinNow = true }, minimumRouletteTime)
+
+    // revert to placeholder timer
     timer.push(setPlaceholderTimer());
 }
 
-// 5 secs max before reverting to placeholder 
+// reverting to placeholder 
 function setPlaceholderTimer() {
     return setTimeout(() => {
 
-        // last dipslayed color (in order to add the hidden class)
-        const lastShownScale = lastScales[lastScales.length - 1];
+        // last displayed color 
+        const lastShownColor = lastShownColors[lastShownColors.length - 1];
 
-        const currentElement = document.querySelector(`#${swellScale[lastShownScale]}`)
-        const nextElement = document.querySelector(`#${swellScale[0]}`)
-        currentElement.classList.add('hidden');
-        nextElement.classList.remove('hidden');
+        // swapping to placeholder
+        const previousColor = document.querySelector(`#${swellScale[lastShownColor]}`)
+        const placeholder = document.querySelector(`#placeholder`)
+        previousColor.classList.add('hidden');
+        placeholder.currentTime = 0
+        placeholder.classList.remove('hidden');
 
-        // reseting the video
-        nextElement.currentTime = 0
-
-        // reseting the last displayed colors because we went back to the placeholder
-        lastScales = [0];
-    }, 5000);
+        // reseting the last displayed colors
+        lastShownColors = [0];
+    }, timeBeforePlaceholder);
 }
 
 // revert to placeholder timer reset (in case of another trigger while displaying a color already)
-function clearPlaceholderTimer() {
-    for (let i = 0; i < timer.length; i++) { clearTimeout(timer[i]); }
-}
+function clearPlaceholderTimer() { for (let i = 0; i < timer.length; i++) { clearTimeout(timer[i]); } }
 
 // random number generator beetween 1 - 7
 function rng() { return Math.floor(Math.random() * 7 + 1) }
