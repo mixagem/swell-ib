@@ -12,8 +12,18 @@ video {
   position: absolute;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
+  /* filter: contrast(1.1); */
 }
 
 .hidden {
   display: none;
-}/*# sourceMappingURL=styles.css.map */
+}
+
+.overlaid{
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 100vw;
+  height: 100vh;
+  /* background-color: rgba(0,0,0,.05) */
+}

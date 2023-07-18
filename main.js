@@ -13,7 +13,7 @@ const swellScale = {
 }
 
 // timings (ms)
-const timeBeforePlaceholder = 60000;
+const timeBeforePlaceholder = 30000;
 const minimumRouletteTime = 15000;
 
 // spinning roulette flag
