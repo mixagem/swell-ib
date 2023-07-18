@@ -90,5 +90,5 @@ function setPlaceholderTimer() {
 // revert to placeholder timer reset (in case of another trigger while displaying a color already)
 function clearPlaceholderTimer() { for (let i = 0; i < timer.length; i++) { clearTimeout(timer[i]); } }
 
-// random number generator beetween 1 - 7
+// random number generator beetween 1 - 9
 function rng() { return Math.floor(Math.random() * 9 + 1) }
