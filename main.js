@@ -1,18 +1,20 @@
 // swell scale enum
 const swellScale = {
     0: 'placeholder',
-    1: 'red',
-    2: 'orange',
-    3: 'yellow',
-    4: 'lime',
-    5: 'green',
-    6: 'purple',
-    7: 'violet'
+    1: 'purple',
+    2: 'pink',
+    3: 'red',
+    4: 'orange',
+    5: 'darkyellow',
+    6: 'yellow',
+    7: 'green',
+    8: 'blue',
+    9: 'darkblue'
 }
 
 // timings (ms)
-const timeBeforePlaceholder = 15000;
-const minimumRouletteTime = 5000;
+const timeBeforePlaceholder = 60000;
+const minimumRouletteTime = 15000;
 
 // spinning roulette flag
 let canWeSpinNow = true;
@@ -48,7 +50,9 @@ function swellRoulette() {
     const nextColor = document.querySelector(`#${swellScale[colorEnum]}`)
     previousColor.classList.add('hidden');
     nextColor.currentTime = 0
+    nextColor.play();
     nextColor.classList.remove('hidden');
+    previousColor.pause();
 
     // saving shown color
     lastShownColors.push(colorEnum)
@@ -76,6 +80,7 @@ function setPlaceholderTimer() {
         previousColor.classList.add('hidden');
         placeholder.currentTime = 0
         placeholder.classList.remove('hidden');
+        placeholder.play();
 
         // reseting the last displayed colors
         lastShownColors = [0];
@@ -86,4 +91,4 @@ function setPlaceholderTimer() {
 function clearPlaceholderTimer() { for (let i = 0; i < timer.length; i++) { clearTimeout(timer[i]); } }
 
 // random number generator beetween 1 - 7
-function rng() { return Math.floor(Math.random() * 7 + 1) }
+function rng() { return Math.floor(Math.random() * 9 + 1) }
